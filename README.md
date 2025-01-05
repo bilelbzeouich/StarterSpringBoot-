@@ -3,6 +3,70 @@
 ## Project Overview
 A microservices-based camping reservation system built with Spring Boot and Spring Cloud. This system enables users to book camping spots, manage payments, leave reviews, and interact with camping center staff.
 
+## Architecture Overview
+
+### System Architecture
+```mermaid
+graph TD
+    Client[Client Applications] --> Gateway[API Gateway :8080]
+    Gateway --> US[User Service :8081]
+    Gateway --> CS[Camping Center Service :8082]
+    Gateway --> RS[Reservation Service :8083]
+    Gateway --> PS[Payment Service :8084]
+    Gateway --> RVS[Review Service :8085]
+    Gateway --> ES[Employee Service :8086]
+    
+    subgraph Infrastructure Services
+        Discovery[Eureka Server :8761]
+        Config[Config Server :8888]
+    end
+    
+    US & CS & RS & PS & RVS & ES --> Discovery
+    US & CS & RS & PS & RVS & ES --> Config
+```
+
+### Database Architecture
+```mermaid
+graph LR
+    subgraph Databases
+        UDB[(User DB)]
+        CDB[(Camping Center DB)]
+        RDB[(Reservation DB)]
+        PDB[(Payment DB)]
+        RevDB[(Review DB)]
+        EDB[(Employee DB)]
+    end
+    
+    US[User Service] --> UDB
+    CS[Camping Service] --> CDB
+    RS[Reservation Service] --> RDB
+    PS[Payment Service] --> PDB
+    RVS[Review Service] --> RevDB
+    ES[Employee Service] --> EDB
+```
+
+### Reservation Flow
+```mermaid
+sequenceDiagram
+    actor User
+    participant Gateway as API Gateway
+    participant RS as Reservation Service
+    participant PS as Payment Service
+    participant CS as Camping Service
+    
+    User->>Gateway: 1. Make Reservation
+    Gateway->>RS: 2. Create Reservation
+    RS->>CS: 3. Check Availability
+    CS-->>RS: 4. Confirm Availability
+    RS-->>Gateway: 5. Reservation Created
+    Gateway-->>User: 6. Reservation Details
+    User->>Gateway: 7. Make Payment
+    Gateway->>PS: 8. Process Payment
+    PS->>RS: 9. Update Reservation
+    PS-->>Gateway: 10. Payment Confirmed
+    Gateway-->>User: 11. Booking Confirmed
+```
+
 ## Architecture Diagram
 ```
                                    [API Gateway :8080]
